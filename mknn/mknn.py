@@ -1,23 +1,32 @@
 from .mknn_utils import distance_matrix, validity, find_majority
 from .exceptions import DistanceException
+import numpy as np
 import pandas as pd
 
 class MKNN(object):
-    def __init__(self, k=3, distance='euclidean'):
+    def __init__(self, k=3, distance='euclidean' , k1=1.5, b=0.75):
         """
         Parameter
         ----------
         k\t= jumlah tetangga terdekat\n
-        distance = 'euclidean', 'manhattan', 'cosine
+        distance = 'euclidean', 'manhattan', 'cosine', 'bm25'
+
+        *Noted: untuk distance bm25 harus menggunakan data 
+        berupa list of string (corpus) sebagai feature-nya.
         """
 
         self.distance_list = [
             'euclidean',
             'manhattan',
-            'cosine'
+            'cosine', 
+            'bm25'
         ]
 
         self.k = k
+
+        # Default parameter untuk BM25
+        self.k1 = k1
+        self.b = b
 
         if distance not in self.distance_list:
             raise DistanceException('jarak {} tidak dikenal'.format(distance))
@@ -31,7 +40,7 @@ class MKNN(object):
         Parameter
         ---------
         X : X training -> data training tanpa label\n
-        y = y Training -> label data training\n
+        y : y Training -> label data training\n
         """
         
         self.X_train = X
@@ -40,7 +49,8 @@ class MKNN(object):
         else:
             self.y = y
 
-        self.distance = distance_matrix(X, X, self.distance_method)
+        self.distance = distance_matrix(X, X, self.k1, self.b, self.distance_method)
+        
         self.validity = validity(self.distance, self.y, self.k)
 
 
@@ -60,10 +70,12 @@ class MKNN(object):
             test = X_test
             
         predicted_label = []
-        distances = distance_matrix(X_test, self.X_train, self.distance_method)
-        print(distances)
+        distances = distance_matrix(X_test, self.X_train, self.k1, self.b, self.distance_method)
+        #print(distances)
+
         for i in distances:
             weight = []
+            
             for j in range(len(self.validity)):
                 weight_j = self.validity[j] * (1 / (i[j] + 0.5))
                 weight.append(weight_j)
@@ -75,7 +87,8 @@ class MKNN(object):
                 f_label.append(y[sorted_index[i]])
             
             majority, count = find_majority(f_label)
-            print(f_label)
+            #print(f_label)
             predicted_label.append(majority)
 
         return predicted_label
+    
