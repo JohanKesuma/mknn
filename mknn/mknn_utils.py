@@ -23,8 +23,6 @@ def distance_matrix(a, b, distance = 'euclidean'):
         return cosine_distances(a, b)
     elif distance == 'bm25':
         return bm25_distances(a, b)
-    elif distance == 'bm25f':
-        return bm25f_simmilarity(a, b)
     else:
         return False;
 
