@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 class MKNN(object):
-    def __init__(self, k=3, distance='euclidean'):
+    def __init__(self, k=3, distance='euclidean' , k1=1.5, b=0.75):
         """
         Parameter
         ----------
@@ -23,6 +23,10 @@ class MKNN(object):
         ]
 
         self.k = k
+
+        # Default parameter untuk BM25
+        self.k1 = k1
+        self.b = b
 
         if distance not in self.distance_list:
             raise DistanceException('jarak {} tidak dikenal'.format(distance))
@@ -45,7 +49,7 @@ class MKNN(object):
         else:
             self.y = y
 
-        self.distance = distance_matrix(X, X, self.distance_method)
+        self.distance = distance_matrix(X, X, self.k1, self.b, self.distance_method)
         
         self.validity = validity(self.distance, self.y, self.k)
 
@@ -66,7 +70,7 @@ class MKNN(object):
             test = X_test
             
         predicted_label = []
-        distances = distance_matrix(X_test, self.X_train, self.distance_method)
+        distances = distance_matrix(X_test, self.X_train, self.k1, self.b, self.distance_method)
         #print(distances)
 
         for i in distances:

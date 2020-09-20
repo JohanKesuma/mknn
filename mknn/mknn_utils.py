@@ -14,22 +14,22 @@ def find_majority(k):
 
     return maximum
 
-def distance_matrix(a, b, distance = 'euclidean'):
+def distance_matrix(X, Y, k1, b, distance = 'euclidean'):
     if distance == 'euclidean':
-        return euclidean_distances(a, b)
+        return euclidean_distances(X, Y)
     elif distance == 'manhattan':
-        return manhattan_distances(a, b)
+        return manhattan_distances(X, Y)
     elif distance == 'cosine':
-        return cosine_distances(a, b)
+        return cosine_distances(X, Y)
     elif distance == 'bm25':
-        return bm25_distances(a, b)
+        return bm25_distances(X, Y, k1, b)
     else:
         return False;
 
-def bm25_distances(queries, corpus):
+def bm25_distances(queries, corpus, k1, b):
     tokenized_corpus = [doc.split() for doc in corpus]
     tokenized_queries = [list(set(doc.split())) for doc in queries]
-    bm25 = BM25Okapi(tokenized_corpus)
+    bm25 = BM25Okapi(tokenized_corpus, k1=k1, b=b)
     
     bm25_simmilarity = np.zeros(shape=(len(tokenized_queries), \
         len(tokenized_corpus)))
